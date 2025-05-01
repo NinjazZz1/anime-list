@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime List</title>
+    <title>Anime Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="index.js"></script>
 </head>
 <body>
     <header>
-        <h1>Anime List</h1>
+        <h1>Anime Tracker</h1>
     </header>
     <main>
+        <div class="container">
+            <h2>Stats</h2>
+            <h3 id="total-anime">Total Anime: 0</h3>
+            <h3 id ="total-watched">Episodes Watched: 0</h3>
+        </div>
         <table class="table">
             <tr>
                 <th>Title</th>
@@ -18,16 +24,32 @@
                 <th>Type</th>
             </tr>
         </table>
-        <dialog>
-            <p>Fill in the details of the Anime</p>
-
-            <button class="addBtn">Add</button>
-        </dialog>
-        <button>Add Anime</button>
+        <div class="bottom-container">
+            <h2>Fill in the details of the Anime</h2>
+            <div id="error"></div>
+            <form id="form">
+                <div>
+                    <label for="title">Anime Name:</label>
+                    <input type="text" name="title" id="title">
+                </div>
+                <div>
+                    <span>
+                        <label for="eps-watched">Episodes Watched:</label>
+                        <input type="number" name="eps-watched" id="eps-watched">
+                        /<label for="total-episodes"></label>
+                        <input type="number" name="eps-total" id="eps-total">
+                    </span>
+                </div>
+                <div>
+                    <label for="type">Type:</label>
+                    <input type="text" name="type" id="type">
+                </div>
+                <button class="addBtn" type="submit">Submit</button>
+            </form>
+        </div>
     </main>
     <footer>
         <h1>By NinjazZz</h1>
     </footer>
-    <script src="index.js"></script>
 </body>
 </html>
