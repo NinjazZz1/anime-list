@@ -67,19 +67,19 @@ table {
     background-color: white;
     color: black;
     border-radius: 25px;
-    margin: 36px;
-    padding: 24px;
+    margin: 24px;
+    padding: 12px;
     width: 80%;
     box-shadow: 5px 5px black;
 }
 
 button {
-    padding: 24px;
-    margin: 8px;
+    padding: 12px;
+    margin: 4px;
     border-radius: 25px;
     border: none;
     background-color: rgb(59, 121, 121);
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: white;
 }
 
@@ -88,13 +88,17 @@ input {
     padding:12px;
     margin: 8px;
     border-radius: 25px;
-    font-size: 2rem;
+    font-size: 1.5rem;
 }
 
 #eps-watched, #eps-total {
     width: 10%;
 }
 
+#title {
+    width: 80%;
+}
+
 form { 
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
