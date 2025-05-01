@@ -62,7 +62,7 @@ function addAnimeToCollection(name, episodes, completedEpisodes, type, id) {
     for (let i = 0; i < myCollection.length; i++) {
         if (myCollection[i].name === name) {
             const item = myCollection[i];
-            updateAnime(i, episodes);
+            updateAnime(i, episodes, completedEpisodes);
             return;
         }
     }
@@ -80,13 +80,17 @@ function addAnimeToCollection(name, episodes, completedEpisodes, type, id) {
     }
 }
 
-function updateAnime(item, episodes) {
-    const section = document.getElementById(item.id);
-    const totalEpisodes = document.querySelector(".total-eps");
-
-    totalEpisodes.innerHTML = episodes.toString() + "/" + myCollection[item].completedEpisodes.toString();
+function updateAnime(item, episodes, completedEpisodes) {
+    const section = document.getElementById("" + myCollection[item].id.toString());
+    const totalEpisodes = section.querySelector(".total-eps")
+    console.log(episodes + "/" + myCollection[item].completedEpisodes);
 
     myCollection[item].episodes = episodes;
+
+    //totalEpisodes.innerHTML = episodes.toString() + "/" + myCollection[item].completedEpisodes.toString();
+
+    totalEpisodes.innerHTML = myCollection[item].episodes.toString() + "/" + completedEpisodes.toString();
+
 
     const jsonArray = JSON.stringify(myCollection);
     localStorage.setItem('array', jsonArray);
@@ -97,7 +101,6 @@ function updateAnime(item, episodes) {
     for (let i = 0; i < myCollection.length; i++) {
         episodesWatched += Number(myCollection[i].episodes);
     }
-    console.log(episodesWatched);
     totalAnime.innerHTML = "Total Anime: " + myCollection.length;
     totalWatched.innerHTML = "Episodes Watched: " + episodesWatched;
 
@@ -133,7 +136,6 @@ function addToTable(id) {
     for (let i = 0; i < myCollection.length; i++) {
         episodesWatched += Number(myCollection[i].episodes);
     }
-    console.log(episodesWatched);
     totalAnime.innerHTML = "Total Anime: " + myCollection.length;
     totalWatched.innerHTML = "Episodes Watched: " + episodesWatched;
 
