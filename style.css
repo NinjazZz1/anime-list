@@ -58,8 +58,8 @@ table {
     width: 80%;
     color: var(--color4);
     background-color: var(--color2);
-    border-radius: 25px;
-    padding: 8px;;
+    border-radius: 8px;
+    padding: 8px;
     box-shadow: 5px 5px black;
 }
 
@@ -72,7 +72,7 @@ table {
     width: 80%;
     color: var(--color4);
     background-color: var(--color2);
-    border-radius: 25px;
+    border-radius: 8px;
     text-align: center;
     box-shadow: 5px 5px black;
 }
@@ -84,7 +84,7 @@ table {
     justify-content: center;
     background-color: var(--color2);
     color: var(--color4);
-    border-radius: 25px;
+    border-radius: 8px;
     margin: 24px;
     padding: 12px;
     width: 80%;
