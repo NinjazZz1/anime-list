@@ -6,8 +6,165 @@ const form = document.getElementById("form");
 const errorElement = document.getElementById("error");
 const totalAnime = document.getElementById("total-anime");
 const totalWatched = document.getElementById("total-watched");
+const resetBtn = document.querySelector(".resetBtn");
 
-let episodesWatched = 0;
+class Anime {
+    constructor(name, episodes, maxEpisodes, type) {
+        this.name = name;
+        this.episodes = episodes;
+        this.maxEpisodes = maxEpisodes;
+        this.type = type;
+
+        this.id = crypto.randomUUID();;
+    }
+
+    info() {
+        return this.name;
+    }
+}
+
+function checkAnime(name, episodes, maxEpisodes, type) {
+    const board = Display.getCollection();
+
+    for (let i = 0; i < board.length; i++) {
+        if (board[i].name == name) {
+            Display.updateAnime(i, episodes, maxEpisodes); 
+            return;
+        }
+    }
+    const anime = new Anime(name, episodes, maxEpisodes, type);
+    Display.addAnime(anime);    
+}
+
+const Display = (() => {
+    let collection = [];
+
+    let episodesWatched = 0;
+
+    const updateStats = () => {
+        episodesWatched = 0;
+        for (let i = 0; i < collection.length; i++) {
+            episodesWatched += Number(collection[i].episodes);
+        }
+        totalAnime.innerHTML = "Total Anime: " + collection.length;
+        totalWatched.innerHTML = "Episodes Watched: " + episodesWatched;
+    }
+
+    const render = () => {
+        clear();
+        sortList();
+        collection.forEach((anime, index) => {
+            let tableType = "";
+
+            if (anime.episodes == anime.maxEpisodes) {
+                tableType = ".table-completed";
+            } else { tableType = ".table-watching"; }
+
+            const table = document.querySelector("" + tableType.toString());
+            // Append section
+            const section = document.createElement("tr");
+            section.setAttribute("id", anime.id);
+            section.classList.add("section");
+            table.appendChild(section);
+
+            const title = document.createElement("td");
+            title.innerHTML = anime.name;
+            title.classList.add("title");
+            section.append(title);
+
+            const totalEpisodes = document.createElement("td")
+            totalEpisodes.innerHTML = anime.episodes.toString() + "/" + anime.maxEpisodes.toString();
+            totalEpisodes.classList.add("center");
+            totalEpisodes.classList.add("total-eps");
+            section.appendChild(totalEpisodes);
+
+            const animeType = document.createElement("td");
+            animeType.innerHTML = anime.type;
+            animeType.classList.add("center");
+            animeType.classList.add("type");
+            section.appendChild(animeType);
+        })
+
+        updateStats();
+    }
+
+    const getCollection = () => collection;
+
+    const updateAnime = (index, episodes, maxEpisodes) => {
+        const section = document.getElementById("" + collection[index].id.toString());
+        const totalEpisodes = section.querySelector(".total-eps");
+
+        collection[index].episodes = episodes;
+        collection[index].maxEpisodes = maxEpisodes;
+
+        totalEpisodes.innerHTML = episodes.toString() + "/" + maxEpisodes.toString();
+        render();
+        DataManager.save();
+    }
+
+    const addAnime = (anime) => {
+        collection.push(anime);
+        render();
+        DataManager.save();
+    }
+
+    const clear = () => {
+        const elements = document.getElementsByClassName("section");
+        while(elements.length > 0) {
+            elements[0].parentNode.removeChild(elements[0]);
+        }
+    }
+
+    const resetCollection = () => {
+        collection = [];
+    }
+
+    const sortList = () => {
+        collection.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return {
+        addAnime,
+        getCollection,
+        clear,
+        updateAnime,
+        render, 
+        resetCollection,
+    }
+})();
+
+const DataManager = (() => {
+    const save = () => {
+        collection = Display.getCollection();
+        const jsonArray = JSON.stringify(collection);
+        localStorage.setItem('array', jsonArray);
+        const str = localStorage.getItem('array');
+        const parsedArray = JSON.parse(str);
+    }
+
+    const load = () => {
+        const str = localStorage.getItem('array');
+        const parsedArray = JSON.parse(str);
+        
+        if (parsedArray) {
+            for (let i = 0; i < parsedArray.length; i++) {
+                checkAnime(parsedArray[i].name, parsedArray[i].episodes, parsedArray[i].maxEpisodes, parsedArray[i].type, parsedArray[i].id); 
+            }
+        }
+    }
+
+    const clearData = () => {
+        localStorage.clear();
+        Display.resetCollection();
+        Display.render();
+    }
+
+    return {
+        save,
+        load,
+        clearData,
+    }
+})();
 
 form.addEventListener("submit", (e) => {
     let messages = [];
@@ -36,122 +193,10 @@ form.addEventListener("submit", (e) => {
         errorElement.innerText = messages.join(", ");
     } else {
         e.preventDefault();
-        addAnimeToCollection(title.value, epsWatched.value, epsTotal.value, type.value);
+        checkAnime(title.value, epsWatched.value, epsTotal.value, type.value);
     }
 })
 
-const table = document.querySelector("table");
+resetBtn.addEventListener("click", DataManager.clearData);
 
-const myCollection = [];
-
-function Anime(name, episodes, completedEpisodes, type, id) {
-    this.name = name;
-    this.episodes = episodes;
-    this.completedEpisodes = completedEpisodes;
-    this.type = type;
-
-    this.id = id;
-
-    this.info = function() {
-        return this.name
-    }
-}
-
-function addAnimeToCollection(name, episodes, completedEpisodes, type, id) {
-
-    for (let i = 0; i < myCollection.length; i++) {
-        if (myCollection[i].name === name) {
-            const item = myCollection[i];
-            updateAnime(i, episodes, completedEpisodes);
-            return;
-        }
-    }
-
-    if (id === "" || id == null) {
-        id = crypto.randomUUID();
-        const animeToAdd = new Anime(name, episodes, completedEpisodes, type, id);
-
-        myCollection.push(animeToAdd);
-        addToTable(animeToAdd.id);
-    } else {
-        const animeToAdd = new Anime(name, episodes, completedEpisodes, type, id);
-        myCollection.push(animeToAdd);
-        addToTable(animeToAdd.id);
-    }
-}
-
-function updateAnime(item, episodes, completedEpisodes) {
-    const section = document.getElementById("" + myCollection[item].id.toString());
-    const totalEpisodes = section.querySelector(".total-eps")
-    console.log(episodes + "/" + myCollection[item].completedEpisodes);
-
-    myCollection[item].episodes = episodes;
-
-    //totalEpisodes.innerHTML = episodes.toString() + "/" + myCollection[item].completedEpisodes.toString();
-
-    totalEpisodes.innerHTML = myCollection[item].episodes.toString() + "/" + completedEpisodes.toString();
-
-
-    const jsonArray = JSON.stringify(myCollection);
-    localStorage.setItem('array', jsonArray);
-    const str = localStorage.getItem('array');
-    const parsedArray = JSON.parse(str);
-
-    episodesWatched = 0;
-    for (let i = 0; i < myCollection.length; i++) {
-        episodesWatched += Number(myCollection[i].episodes);
-    }
-    totalAnime.innerHTML = "Total Anime: " + myCollection.length;
-    totalWatched.innerHTML = "Episodes Watched: " + episodesWatched;
-
-}
-
-function addToTable(id) {
-    for (let i = 0; i < myCollection.length; i++) {
-        if (myCollection[i].id === id) {
-            const section = document.createElement("tr");
-            section.setAttribute("id", id);
-            table.appendChild(section);
-
-            const title = document.createElement("td");
-            title.innerHTML = myCollection[i].name;
-            title.classList.add("title");
-            section.append(title);
-
-            const totalEpisodes = document.createElement("td")
-            totalEpisodes.innerHTML = myCollection[i].episodes.toString() + "/" + myCollection[i].completedEpisodes.toString();
-            totalEpisodes.classList.add("center");
-            totalEpisodes.classList.add("total-eps");
-            section.appendChild(totalEpisodes);
-
-            const animeType = document.createElement("td");
-            animeType.innerHTML = myCollection[i].type;
-            animeType.classList.add("center");
-            animeType.classList.add("type");
-            section.appendChild(animeType);
-        }
-    }
-
-    episodesWatched = 0;
-    for (let i = 0; i < myCollection.length; i++) {
-        episodesWatched += Number(myCollection[i].episodes);
-    }
-    totalAnime.innerHTML = "Total Anime: " + myCollection.length;
-    totalWatched.innerHTML = "Episodes Watched: " + episodesWatched;
-
-
-    const jsonArray = JSON.stringify(myCollection);
-    localStorage.setItem('array', jsonArray);
-    const str = localStorage.getItem('array');
-    const parsedArray = JSON.parse(str);
-
-}
-
-const str = localStorage.getItem('array');
-const parsedArray = JSON.parse(str);
-
-for (let i = 0; i < parsedArray.length; i++) {
-     addAnimeToCollection(parsedArray[i].name, parsedArray[i].episodes, parsedArray[i].completedEpisodes, parsedArray[i].type, parsedArray[i].id); 
-}
-
-// localStorage.clear();
+DataManager.load();
